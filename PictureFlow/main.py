@@ -10,11 +10,11 @@ app.config['SECRET_KEY'] = API_KEY
 
 
 def main():
+    db_session.global_init("db/users.db")
     app.run(debug=True)
 
 
 @app.route('/')
-@app.route('/main')
 def index():
     return render_template('main.html')
 
