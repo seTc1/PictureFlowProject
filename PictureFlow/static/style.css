@@ -6,6 +6,10 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.text {
+    font-family: inherit;
+}
+
 .img-card img {
     width: 100%;
     height: auto;
@@ -26,6 +30,76 @@
     margin-left: -250px;
 }
 
-.nav-item {
-    margin-right: -800px;
+
+/* Кнопка */
+.btn-primary {
+    margin-bottom: -100px;
+    background: #0d6efd;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+/* Контейнер регистрации */
+.register-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок */
+.register-container h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Поля ввода */
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.25);
+}
+
+.foot-link {
+  color: #0d6efd;
+}
+
+/* Заголовки полей в том же шрифте, что и весь текст */
+.form-label {
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+
+.footer-container {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #f8f9fa;
+    text-align: center;
+    padding: 10px 0;
+    font-family: inherit;
+}
+
+.footer-container a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.footer-container a:hover {
+    color: #0b5ed7;
 }
