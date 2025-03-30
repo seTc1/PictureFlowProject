@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<main role="main" class="container">
+   <div class="container mt-5 text-center">
+      <h1 class="mb-1">PicFlow</h1>
+      <h2 class="sub-text">cайт для хостинга и обмена картинками</h2>
+      <p class="mb-5"></p>
+      <div class="row">
+         <!-- Заготовка для изображений -->
+         <div class="row justify-content-center">
+            <div class="col-md-3 mb-4">
+               <div class="img-card">
+                  <img src="{{ url_for('static', filename='images/demo1.jpg') }}" alt="Image">
+               </div>
+            </div>
+            <div class="col-md-3 mb-4">
+               <div class="img-card">
+                  <img src="{{ url_for('static', filename='images/demo2.jpg') }}" alt="Image">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</main>
+{% endblock %}

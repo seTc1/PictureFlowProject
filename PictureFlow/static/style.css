@@ -1,0 +1,31 @@
+.img-card {
+    transition: 0.3s;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.img-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+.img-card:hover {
+    transform: scale(1.05);
+}
+
+.sub-text {
+    color: #0d6efd;
+    font-family: inherit;
+    font-size: 1.25rem;
+}
+
+.navbar-brand {
+    margin-left: -250px;
+}
+
+.nav-item {
+    margin-right: -800px;
+}

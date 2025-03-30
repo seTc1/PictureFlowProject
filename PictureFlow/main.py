@@ -15,8 +15,13 @@ def main():
 
 @app.route('/')
 @app.route('/main')
-def base():
-    return render_template('index.html')
+def index():
+    return render_template('main.html')
+
+@app.route('/login')
+def login():
+    return render_template('register.html')
+
 
 @app.errorhandler(404)
 def page_not_found(error):
