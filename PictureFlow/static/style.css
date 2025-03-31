@@ -26,17 +26,13 @@
     font-size: 1.25rem;
 }
 
-.navbar-brand {
-    margin-left: -250px;
-}
-
 
 /* Кнопка */
 .btn-primary {
-    margin-bottom: -100px;
+    margin-bottom: -125px;
     background: #0d6efd;
     border: none;
-    padding: 12px 24px;
+    width: 50%;
     font-size: 1.2rem;
     border-radius: 8px;
     transition: 0.3s;
@@ -88,9 +84,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #f8f9fa;
     text-align: center;
-    padding: 10px 0;
+    padding: 50px 0;
     font-family: inherit;
 }
 

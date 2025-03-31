@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="register-container">  <!-- Используем тот же класс, что и в регистрации -->
+<div class="register-container">
     <h1 class="text-center">Авторизация</h1>
     <form action="" method="post" class="register-form">
         {{ form.hidden_tag() }}
@@ -27,11 +27,11 @@
             {{ form.remember_me.label(class="form-check-label") }}
         </div>
 
-        <div class="text-center">
-            {{ form.submit(type="submit", class="btn btn-primary btn-lg") }}
-        </div>
-
         <div class="mt-3">{{ message }}</div>
+
+        <div class="text-center">
+            {{ form.submit(type="submit", class="btn btn-primary btn-lg mt-5") }}
+        </div>
     </form>
 </div>
 {% endblock %}

@@ -38,16 +38,15 @@
             {% endfor %}
         </div>
 
-        <div class="text-center">
-            {{ form.submit(type="submit", class="btn btn-primary btn-lg") }}
+        <div class="mt-3">{{ message }}</div>
+
+        <div class="text-center ">
+            {{ form.submit(type="submit", class="btn btn-primary btn-lg mt-5") }}
         </div>
-        {{ message }}
     </form>
 </div>
 
-<!-- Футер внизу экрана -->
-<div class="footer-container">
-    <p></p>
-    Уже зарегистрированы? <a href="/login">Войти</a>
+<div class="footer-container text-center mt-5">
+    <p>Уже зарегистрированы? <a href="/login">Войти</a></p>
 </div>
 {% endblock %}
