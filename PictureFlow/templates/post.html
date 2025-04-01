@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="register-container text-center">
+    <h1 class="text">{{ media.name }}</h1>
+    <div class="img-card mx-auto mt-3" style="max-width: 500px;">
+        <img src="/media/{{ media.url }}{{ media.extension }}" alt="{{ media.name }}">
+
+    </div>
+    <p class="sub-text mt-3">{{ media.description }}</p>
+</div>
+{% endblock %}

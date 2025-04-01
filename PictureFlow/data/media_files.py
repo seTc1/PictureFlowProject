@@ -14,6 +14,7 @@ class Media(SqlAlchemyBase, UserMixin):
     autor = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     hiden = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    extension = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     def __repr__(self):
         return f'<Media> {self.url} {self.name}'

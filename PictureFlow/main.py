@@ -1,11 +1,10 @@
 import os
 import string
-import uuid
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import random
-
+from flask import send_from_directory
 from forms.user_form import RegisterForm, LoginForm
 from forms.media_form import UploadForm
 from data import db_session
@@ -32,7 +31,7 @@ def index():
     if current_user.is_authenticated:
         username = current_user.name
         print(current_user)
-    return render_template('main.html', registered=current_user.is_authenticated, username=username)
+    return render_template('main.html', registered=current_user.is_authenticated, username=username, title="PicFlow")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -59,38 +58,38 @@ def reqister():
         return redirect('/profile')
     else:
         form = RegisterForm()
-        if current_user.is_authenticated:
-            return redirect('/profile')
-        else:
-            form = RegisterForm()
-            if form.validate_on_submit():
-                if form.password.data != form.password_again.data:
-                    return render_template('register.html', title='Регистрация',
-                                           form=form,
-                                           message="Пароли не совпадают")
-                if len(form.name.data) > 16:
-                    return render_template('register.html', title='Регистрация',
-                                           form=form,
-                                           message="Слишком длинное имя (> 16)")
-                db_sess = db_session.create_session()
-                if db_sess.query(User).filter(User.email == form.email.data).first():
-                    return render_template('register.html', title='Регистрация',
-                                           form=form,
-                                           message="Такой пользователь уже есть")
-                user = User(
-                    name=form.name.data,
-                    email=form.email.data,
-                )
-                user.set_password(form.password.data)
-                db_sess.add(user)
-                db_sess.commit()
-                db_sess = db_session.create_session()
-                user = db_sess.query(User).filter(User.email == form.email.data).first()
-                if user and user.check_password(form.password.data):
-                    login_user(user)
-                    return redirect("/")
-                return redirect('/')
-            return render_template('register.html', title='Регистрация', form=form)
+        if form.validate_on_submit():
+            if form.password.data != form.password_again.data:
+                return render_template('register.html', title='Регистрация',
+                                       form=form,
+                                       message="Пароли не совпадают!")
+            if len(form.name.data) > 16:
+                return render_template('register.html', title='Регистрация',
+                                       form=form,
+                                       message="Слишком длинное имя (> 16)!")
+            db_sess = db_session.create_session()
+            if db_sess.query(User).filter(User.email == form.email.data).first():
+                return render_template('register.html', title='Регистрация',
+                                       form=form,
+                                       message="Почта уже зарегестрирована!")
+            elif db_sess.query(User).filter(User.name == form.name.data).first():
+                return render_template('register.html', title='Регистрация',
+                                       form=form,
+                                       message="Имя пользователя уже использованно!")
+            user = User(
+                name=form.name.data,
+                email=form.email.data,
+            )
+            user.set_password(form.password.data)
+            db_sess.add(user)
+            db_sess.commit()
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).filter(User.email == form.email.data).first()
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                return redirect("/")
+            return redirect('/')
+        return render_template('register.html', title='Регистрация', form=form)
 
 
 @app.route('/profile')
@@ -120,17 +119,57 @@ def upload():
                 author_name = 'Гость'
 
             db_sess = db_session.create_session()
+            extension = form.file.name
             media = Media(
                 url=unique_name,
                 name=form.name.data,
                 description=form.description.data,
                 autor=author_name,
-                hiden=False
+                hiden=False,
+                extension=ext
             )
             db_sess.add(media)
             db_sess.commit()
             return redirect('/')
-    return render_template('upload.html', form=form)
+    return render_template('upload.html', registered=current_user.is_authenticated, form=form, title="Загрузка")
+
+
+
+@app.route('/download/<url>')
+def download_media(url):
+    media_folder = 'media'
+    db_sess = db_session.create_session()
+    media_entry = db_sess.query(Media).filter(Media.url == url).first()
+
+    if not media_entry:
+        abort(404)
+
+    for file in os.listdir(media_folder):
+        if file.startswith(url):
+            return send_from_directory(media_folder, file, as_attachment=True)
+
+    abort(404)
+
+@app.route('/post/<url>')
+def get_post(url):
+    media_folder = 'media'
+    db_sess = db_session.create_session()
+    media_entry = db_sess.query(Media).filter(Media.url == url).first()
+
+    if not media_entry:
+        abort(404)
+
+    file_path = None
+    for file in os.listdir(media_folder):
+        if file.startswith(url):
+            file_path = file
+            break
+
+    if not file_path:
+        abort(404)
+
+    return render_template('post.html', media=media_entry, file_path=file_path,
+                           registered=current_user.is_authenticated)
 
 
 @app.route('/logout')
