@@ -27,7 +27,11 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('main.html', current_user=current_user, title="PicFlow")
+    db_sess = db_session.create_session()
+    media_entries = db_sess.query(Media).filter(Media.hiden == False).all()
+    random.shuffle(media_entries)
+    return render_template('main.html', current_user=current_user, title="PicFlow", media_entries=media_entries)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])

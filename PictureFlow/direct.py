@@ -3,6 +3,7 @@ import os
 # Словарь с файлами: ключ - название файла, значение - путь к файлу
 file_dict = {
     'main.py': "main.py",
+    'media_files.py': "data/media_files.py",
     'base.html': 'templates/base.html',
     'main.html': 'templates/main.html',
     'post.html': 'templates/post.html',
