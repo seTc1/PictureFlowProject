@@ -1,5 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
+<script>
+document.addEventListener("paste", async (event) => {
+    let items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    for (let item of items) {
+        if (item.kind === "file") {
+            let file = item.getAsFile();
+            let formData = new FormData();
+            formData.append("file", file);
+
+            let inputFile = document.querySelector('input[type="file"]');
+            let dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            inputFile.files = dataTransfer.files;
+        }
+    }
+});
+</script>
 <div class="register-container">
     <h1 class="text-center">Загрузка изображения</h1>
     <form method="post" enctype="multipart/form-data" class="register-form">

@@ -27,11 +27,7 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    username = None
-    if current_user.is_authenticated:
-        username = current_user.name
-        print(current_user)
-    return render_template('main.html', registered=current_user.is_authenticated, username=username, title="PicFlow")
+    return render_template('main.html', current_user=current_user, title="PicFlow")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -119,7 +115,6 @@ def upload():
                 author_name = 'Гость'
 
             db_sess = db_session.create_session()
-            extension = form.file.name
             media = Media(
                 url=unique_name,
                 name=form.name.data,
@@ -130,9 +125,8 @@ def upload():
             )
             db_sess.add(media)
             db_sess.commit()
-            return redirect('/')
-    return render_template('upload.html', registered=current_user.is_authenticated, form=form, title="Загрузка")
-
+            return redirect(f'/post/{unique_name}')
+    return render_template('upload.html', current_user=current_user, form=form, title="Загрузка")
 
 
 @app.route('/download/<url>')
@@ -150,6 +144,7 @@ def download_media(url):
 
     abort(404)
 
+
 @app.route('/post/<url>')
 def get_post(url):
     media_folder = 'media'
@@ -157,6 +152,7 @@ def get_post(url):
     media_entry = db_sess.query(Media).filter(Media.url == url).first()
 
     if not media_entry:
+        print("aboba")
         abort(404)
 
     file_path = None
@@ -166,10 +162,11 @@ def get_post(url):
             break
 
     if not file_path:
+        print("aboba2")
         abort(404)
 
-    return render_template('post.html', media=media_entry, file_path=file_path,
-                           registered=current_user.is_authenticated)
+    return render_template('post.html', media=media_entry, url=url, ext=media_entry.extension,
+                           current_user=current_user, title=media_entry.name)
 
 
 @app.route('/logout')

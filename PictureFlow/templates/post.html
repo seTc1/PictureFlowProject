@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="register-container text-center">
-    <h1 class="text">{{ media.name }}</h1>
-    <div class="img-card mx-auto mt-3" style="max-width: 500px;">
-        <img src="/media/{{ media.url }}{{ media.extension }}" alt="{{ media.name }}">
-
+<div class="post-container d-flex justify-content-center align-items-start mt-5">
+    <div class="image-section">
+        <img src="{{ url_for('download_media', url=url) }}" alt="{{ media.name }}" class="img-fluid">
     </div>
-    <p class="sub-text mt-3">{{ media.description }}</p>
+    <div class="info-section p-4">
+        <h1 class="post-title">{{ media.name }}</h1>
+        <p class="post-description">{{ media.description }}</p>
+        <div class="author">Автор: {{ media.autor }}</div>
+    </div>
 </div>
 {% endblock %}
