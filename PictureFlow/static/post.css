@@ -1,0 +1,49 @@
+.post-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    max-width: 700px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.image-section {
+    flex: 1.5;
+    display: flex;
+}
+
+.image-section img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+}
+
+.info-section {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.post-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.post-description {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.author {
+    font-size: 0.9rem;
+    color: #888;
+}

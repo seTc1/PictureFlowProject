@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<link href="{{ url_for('static', filename='form.css') }}" rel="stylesheet">
 <script>
 document.addEventListener("paste", async (event) => {
     let items = (event.clipboardData || event.originalEvent.clipboardData).items;

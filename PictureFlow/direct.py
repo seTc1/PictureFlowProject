@@ -5,12 +5,22 @@ file_dict = {
     'main.py': "main.py",
     'base.html': 'templates/base.html',
     'main.html': 'templates/main.html',
-    'style.css': 'static/style.css'
+    'post.html': 'templates/post.html',
+    'upload.html': 'templates/upload.html',
+    'register.html': 'templates/register.html',
+    'login.html': 'templates/login.html',
+    'style.css': 'static/style.css',
+    'form.css': 'static/form.css',
+    'post.css': 'static/post.css',
+    'main.css': 'static/main.css',
 }
 
 
 def read_files(file_names):
     combined_content = ""
+
+    if "all" in file_names:
+        file_names = file_dict.keys()
 
     for file_name in file_names:
         if file_name in file_dict:
