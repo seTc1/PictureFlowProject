@@ -1,16 +1,15 @@
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, scoped_session
 
 SqlAlchemyBase = orm.declarative_base()
 
-__factory = None
-
+Session = None  # Будет инициализирован как scoped_session
 
 def global_init(db_file):
-    global __factory
+    global Session
 
-    if __factory:
+    if Session:
         return
 
     if not db_file or not db_file.strip():
@@ -19,14 +18,18 @@ def global_init(db_file):
     conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
     print(f"Подключение к базе данных по адресу {conn_str}")
 
-    engine = sa.create_engine(conn_str, echo=False)
-    __factory = orm.sessionmaker(bind=engine)
+    engine = sa.create_engine(
+        conn_str,
+        echo=False,
+        pool_size=20,
+        max_overflow=30,
+        pool_timeout=30
+    )
+    session_factory = orm.sessionmaker(bind=engine)
+    Session = scoped_session(session_factory)
 
     from . import __all_models
-
     SqlAlchemyBase.metadata.create_all(engine)
 
-
 def create_session() -> Session:
-    global __factory
-    return __factory()
+    return Session()

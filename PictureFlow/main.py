@@ -24,24 +24,33 @@ def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.Session.remove()
 
 @app.route('/')
 def index():
     db_sess = db_session.create_session()
-    media_entries = db_sess.query(Media).filter(Media.hiden == False).all()
-    random.shuffle(media_entries)
-    return render_template('main.html', current_user=current_user, title="PicFlow", media_entries=media_entries)
-
+    try:
+        media_entries = db_sess.query(Media).filter(Media.hiden == False).all()
+        random.shuffle(media_entries)
+        return render_template('main.html',
+                             current_user=current_user,
+                             title="PicFlow",
+                             media_entries=media_entries)
+    finally:
+        db_sess.close()
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect('/profile')
-    else:
-        form = LoginForm()
-        if form.validate_on_submit():
-            db_sess = db_session.create_session()
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        try:
             user = db_sess.query(User).filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data):
                 login_user(user, remember=form.remember_me.data)
@@ -49,7 +58,9 @@ def login():
             return render_template('login.html',
                                    message="Неправильный логин или пароль",
                                    form=form)
-        return render_template('login.html', title='Авторизация', form=form)
+        finally:
+            db_sess.close()
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -137,17 +148,17 @@ def upload():
 def download_media(url):
     media_folder = 'media'
     db_sess = db_session.create_session()
-    media_entry = db_sess.query(Media).filter(Media.url == url).first()
+    try:
+        media_entry = db_sess.query(Media).filter(Media.url == url).first()
+        if not media_entry:
+            abort(404)
 
-    if not media_entry:
+        for file in os.listdir(media_folder):
+            if file.startswith(url):
+                return send_from_directory(media_folder, file, as_attachment=True)
         abort(404)
-
-    for file in os.listdir(media_folder):
-        if file.startswith(url):
-            return send_from_directory(media_folder, file, as_attachment=True)
-
-    abort(404)
-
+    finally:
+        db_sess.close()
 
 @app.route('/post/<url>')
 def get_post(url):
