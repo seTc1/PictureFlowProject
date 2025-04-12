@@ -10,8 +10,8 @@
     <div class="masonry-grid">
       {% for media in media_entries %}
       <div class="masonry-item">
-        <a href="{{ url_for('get_post', url=media.url) }}">
-          <img src="{{ url_for('download_media', url=media.url) }}" alt="{{ media.name }}">
+        <a href="{{ url_for('get_post', url=media.post_url) }}">
+          <img src="{{ url_for('download_media', url=media.post_url) }}" alt="{{ media.post_name }}">
         </a>
       </div>
       {% endfor %}

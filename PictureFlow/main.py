@@ -112,19 +112,25 @@ def reqister():
         return render_template('register.html', title='Регистрация', form=form)
 
 
-@application.route('/profile')
-@login_required
-def profile():
+@application.route('/profile/<username>')
+def profile(username):
     db_sess = db_session.create_session()
     try:
-        media_entries = db_sess.query(Media).filter(Media.autor_name == current_user.name).all()
+        is_owner = current_user.is_authenticated and current_user.name == username
+        if is_owner:
+            media_entries = db_sess.query(Media).filter(Media.autor_name == username).all()
+        else:
+            media_entries = db_sess.query(Media).filter(Media.autor_name == username, Media.hiden_post == False).all()
+        user_data = db_sess.query(User).filter(User.name == username).first()
+        if not user_data:
+            abort(404)
         return render_template('profile.html',
                                current_user=current_user,
-                               title="Профиль",
+                               title=f"Профиль {username}",
+                               profile_user=user_data,
                                media_entries=media_entries)
     finally:
         db_sess.close()
-
 
 
 @application.route('/upload', methods=['GET', 'POST'])
