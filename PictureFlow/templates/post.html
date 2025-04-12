@@ -6,9 +6,9 @@
         <img src="{{ url_for('download_media', url=url) }}" alt="{{ media.name }}" class="img-fluid">
     </div>
     <div class="info-section p-4">
-        <h1 class="post-title">{{ media.name }}</h1>
-        <p class="post-description">{{ media.description }}</p>
-        <div class="author">Автор: {{ media.autor }}</div>
+        <h1 class="post-title">{{ media.post_name }}</h1>
+        <p class="post-description">{{ media.post_description }}</p>
+        <div class="author">Автор: {{ media.autor_name }}</div>
     </div>
 </div>
 {% endblock %}

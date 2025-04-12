@@ -7,14 +7,16 @@ from .db_session import SqlAlchemyBase
 class Media(SqlAlchemyBase, UserMixin):
     __tablename__ = 'media_files'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    url = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    autor = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    hiden = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    post_id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
+    post_url = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
+    post_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    post_description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    file_extension = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    hiden_post = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-    extension = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    autor_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    autor_ip = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
     def __repr__(self):
-        return f'<Media> {self.url} {self.name}'
+        return f'<Media> {self.post_url} {self.post_name}'
+

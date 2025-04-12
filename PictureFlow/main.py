@@ -1,5 +1,7 @@
 import os
 import string
+from doctest import debug
+
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -11,28 +13,35 @@ from data import db_session
 from data.users_data import User
 from data.media_files import Media
 
-app = Flask(__name__)
+application = Flask(__name__)
 with open('API_KEY.api', 'r') as file:
     API_KEY = file.readline().strip()
-app.config['SECRET_KEY'] = API_KEY
+application.config['SECRET_KEY'] = API_KEY
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(application)
 
+BANNED_IPS = []
+
+@application.before_request
+def block_banned_ips():
+    client_ip = request.remote_addr
+    if client_ip in BANNED_IPS:
+        abort(403)
 
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
-@app.teardown_appcontext
+@application.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.Session.remove()
 
-@app.route('/')
+@application.route('/')
 def index():
     db_sess = db_session.create_session()
     try:
-        media_entries = db_sess.query(Media).filter(Media.hiden == False).all()
+        media_entries = db_sess.query(Media).filter(Media.hiden_post == False).all()
         random.shuffle(media_entries)
         return render_template('main.html',
                              current_user=current_user,
@@ -42,7 +51,7 @@ def index():
         db_sess.close()
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect('/profile')
@@ -63,7 +72,7 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@application.route('/register', methods=['GET', 'POST'])
 def reqister():
     if current_user.is_authenticated:
         return redirect('/profile')
@@ -103,53 +112,84 @@ def reqister():
         return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route('/profile')
+@application.route('/profile')
 @login_required
 def profile():
-    if current_user.is_authenticated:
-        return redirect('/')
+    db_sess = db_session.create_session()
+    try:
+        media_entries = db_sess.query(Media).filter(Media.autor_name == current_user.name).all()
+        return render_template('profile.html',
+                               current_user=current_user,
+                               title="Профиль",
+                               media_entries=media_entries)
+    finally:
+        db_sess.close()
 
 
-@app.route('/upload', methods=['GET', 'POST'])
+
+@application.route('/upload', methods=['GET', 'POST'])
 def upload():
     form = UploadForm()
     if form.validate_on_submit():
+        name = form.name.data.strip()
+        description = form.description.data.strip()
+        file_name = form.file.data.filename
+        print(file_name)
+
+        if len(name) > 20:
+            print(name)
+            return render_template('upload.html', current_user=current_user, form=form,
+                                   title="Загрузка публикации", message="Название не должно превышать 20 символов")
+
+        if len(description) > 200:
+            return render_template('upload.html', current_user=current_user, form=form,
+                                   title="Загрузка публикации", message="Описание не должно превышать 200 символов")
+        if not file_name.endswith((".jpg", ".png", ".jpeg")):
+            return render_template('upload.html', current_user=current_user, form=form,
+                                   title="Загрузка публикации", message="Не поддерживаемое расширение файла")
+
+        if not name:
+            name = "Нет названия"
+        if not description:
+            description = "Нет описания"
+
         file = form.file.data
         if file:
             filename = secure_filename(file.filename)
             ext = os.path.splitext(filename)[1]
-            unique_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+            unique_name = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
             file_path = os.path.join('media', f"{unique_name}{ext}")
 
             os.makedirs('media', exist_ok=True)
             file.save(file_path)
 
-            if current_user.is_authenticated:
-                author_name = current_user.name
-            else:
-                author_name = 'Гость'
+            author_name = current_user.name if current_user.is_authenticated else 'Гость'
+            author_ip = request.remote_addr or 'Неизвестно'
 
             db_sess = db_session.create_session()
             media = Media(
-                url=unique_name,
-                name=form.name.data,
-                description=form.description.data,
-                autor=author_name,
-                hiden=False,
-                extension=ext
+                post_url=unique_name,
+                post_name=name,
+                post_description=description,
+                autor_name=author_name,
+                autor_ip=author_ip,
+                hiden_post=form.is_private.data if current_user.is_authenticated else False,
+                file_extension=ext
             )
             db_sess.add(media)
             db_sess.commit()
             return redirect(f'/post/{unique_name}')
-    return render_template('upload.html', current_user=current_user, form=form, title="Загрузка")
+    return render_template('upload.html', current_user=current_user, form=form, title="Загрузка публикации")
 
 
-@app.route('/download/<url>')
+
+
+@application.route('/download/<url>')
 def download_media(url):
     media_folder = 'media'
     db_sess = db_session.create_session()
     try:
-        media_entry = db_sess.query(Media).filter(Media.url == url).first()
+        media_entry = db_sess.query(Media).filter(Media.post_url == url).first()
         if not media_entry:
             abort(404)
 
@@ -160,11 +200,11 @@ def download_media(url):
     finally:
         db_sess.close()
 
-@app.route('/post/<url>')
+@application.route('/post/<url>')
 def get_post(url):
     media_folder = 'media'
     db_sess = db_session.create_session()
-    media_entry = db_sess.query(Media).filter(Media.url == url).first()
+    media_entry = db_sess.query(Media).filter(Media.post_url == url).first()
 
     if not media_entry:
         print("aboba")
@@ -180,25 +220,25 @@ def get_post(url):
         print("aboba2")
         abort(404)
 
-    return render_template('post.html', media=media_entry, url=url, ext=media_entry.extension,
-                           current_user=current_user, title=media_entry.name)
+    return render_template('post.html', media=media_entry, url=url, ext=media_entry.file_extension,
+                           current_user=current_user, title=media_entry.post_name)
 
 
-@app.route('/logout')
+@application.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
 
 
-@app.errorhandler(404)
+@application.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
 
 
 def main():
     db_session.global_init("db/instance_data.db")
-    app.run(debug=True)
+    application.run(debug=True)
 
 
 if __name__ == '__main__':

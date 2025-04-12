@@ -7,6 +7,7 @@ file_dict = {
     'db_session.py': "data/db_session.py",
     '__all_models.py': "data/__all_models.py",
     'users_data.py': "data/users_data.py",
+    'media_form.py': "forms/media_form.py",
     'base.html': 'templates/base.html',
     'main.html': 'templates/main.html',
     'post.html': 'templates/post.html',
