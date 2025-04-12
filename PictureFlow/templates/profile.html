@@ -2,20 +2,27 @@
 {% block content %}
 <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
 <main role="main" class="container">
-  <div class="container mt-5 text-center">
-    <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
-      <h1 class="mb-0">Профиль</h1>
-    </div>
+    <div class="container mt-5 text-center">
+        <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
+            <h1 class="mb-0">{{title}}</h1>
+        </div>
 
-    <div class="masonry-grid">
-      {% for media in media_entries %}
-      <div class="masonry-item">
-        <a href="{{ url_for('get_post', url=media.post_url) }}">
-          <img src="{{ url_for('download_media', url=media.post_url) }}" alt="{{ media.post_name }}">
-        </a>
-      </div>
-      {% endfor %}
+        <div class="masonry-grid">
+            {% for media in media_entries %}
+            <div class="masonry-item">
+                {% if media.hiden_post %}
+                <div class="alert alert-danger text-center py-1 mb-2" role="alert" style=".text">
+                    Приватный
+                </div>
+                {% endif %}
+                <a href="{{ url_for('get_post', url=media.post_url) }}">
+                    <img src="{{ url_for('download_media', url=media.post_url) }}" alt="{{ media.post_name }}">
+                </a>
+            </div>
+            {% endfor %}
+
+
+        </div>
     </div>
-  </div>
 </main>
 {% endblock %}

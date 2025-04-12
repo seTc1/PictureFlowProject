@@ -1,20 +1,157 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ошибка 404 – Не найдено</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<link href="{{ url_for('static', filename='404.css') }}" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
 
-<div class="container text-center mt-5">
-    <h1 class="display-1 text-danger">404</h1>
-    <h2 class="mb-4">Ой! Ничего не найдено.</h2>
-    <p class="lead">Похоже, страница, которую вы ищете, не существует.</p>
-    <a href="/" class="btn btn-primary mt-3">Вернуться на главную</a>
-    <p></p>
-    <img src="{{ url_for('static', filename='images/huh.jpg') }}" alt="hjuh" class="img-fluid mt-4" style="max-width: 300px;">
+<div class="error-wrapper text-center">
+    <div class="error-container">
+        <h1 class="text-danger">ОШИБКА 404</h1>
+        <p class="fs-5 mt-3">Похоже, что страница, которую вы ищете, не существует или была перемещена.</p>
+
+        <div id="physics-container" class="my-4"></div>
+
+        <a href="/" class="btn full-width-btn btn-lg mt-4">Вернуться на главную</a>
+    </div>
 </div>
-</body>
-</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация Matter.js
+        const Engine = Matter.Engine,
+              Render = Matter.Render,
+              World = Matter.World,
+              Bodies = Matter.Bodies,
+              Body = Matter.Body;
+
+        const container = document.getElementById('physics-container');
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+
+        // Создаем движок
+        const engine = Engine.create({
+            enableSleeping: false,
+            gravity: { y: 0.5 }
+        });
+
+        // Создаем рендерер
+        const render = Render.create({
+            element: container,
+            engine: engine,
+            options: {
+                width: containerWidth,
+                height: containerHeight,
+                wireframes: false,
+                background: '#f8f9fa'
+            }
+        });
+
+        // Создаем границы
+        const ground = Bodies.rectangle(containerWidth/2, containerHeight + 25, containerWidth, 50, {
+            isStatic: true,
+            render: { visible: false },
+            restitution: 0.7
+        });
+
+        const leftWall = Bodies.rectangle(-25, containerHeight/2, 50, containerHeight, {
+            isStatic: true,
+            render: { visible: false },
+            restitution: 0.4
+        });
+
+        const rightWall = Bodies.rectangle(containerWidth + 25, containerHeight/2, 50, containerHeight, {
+            isStatic: true,
+            render: { visible: false },
+            restitution: 0.4
+        });
+
+        // Добавляем объекты в мир
+        World.add(engine.world, [ground, leftWall, rightWall]);
+
+        // Запускаем движок
+        Engine.run(engine);
+        Render.run(render);
+
+        // Создаем падающую картинку
+        const img = document.createElement('img');
+        img.src = "{{ url_for('static', filename='images/huh.jpg') }}";
+        img.className = 'falling-img';
+        img.style.left = (containerWidth/2 - 75) + 'px';
+        img.style.top = '-150px';
+        container.appendChild(img);
+
+        // Создаем физическое тело для картинки
+        const imgBody = Bodies.circle(
+            containerWidth/2,
+            -50,
+            60,
+            {
+                restitution: 0.8,
+                friction: 0.005,
+                render: {
+                    visible: false
+                },
+                collisionFilter: {
+                    group: -1
+                }
+            }
+        );
+
+        World.add(engine.world, imgBody);
+
+        // Функция для случайного отскока
+        function applyRandomBounce() {
+            const randomDirection = Math.random() > 0.5 ? 1 : -1;
+            const randomForce = 0.01 + Math.random() * 0.02;
+
+            Body.applyForce(imgBody, imgBody.position, {
+                x: randomDirection * randomForce,
+                y: -0.03
+            });
+        }
+
+        // Событие столкновения
+        Matter.Events.on(engine, 'collisionStart', function(event) {
+            const pairs = event.pairs;
+
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+
+                if ((pair.bodyA === imgBody && pair.bodyB === ground) ||
+                    (pair.bodyB === imgBody && pair.bodyA === ground)) {
+                    applyRandomBounce();
+                }
+            }
+        });
+
+        // Связываем DOM-элемент с физическим телом
+        function updatePosition() {
+            const pos = imgBody.position;
+            const angle = imgBody.angle;
+
+            img.style.left = (pos.x - 75) + 'px';
+            img.style.top = (pos.y - 75) + 'px';
+            img.style.transform = `rotate(${angle}rad)`;
+
+            // Если картинка упала слишком низко, подбрасываем её снова
+            if (pos.y > containerHeight + 100) {
+                Body.setPosition(imgBody, {
+                    x: containerWidth/2,
+                    y: -50
+                });
+                Body.setVelocity(imgBody, { x: 0, y: 0 });
+            }
+
+            requestAnimationFrame(updatePosition);
+        }
+
+        updatePosition();
+
+        // Клик по картинке добавляет силу
+        img.addEventListener('click', function() {
+            Body.applyForce(imgBody, imgBody.position, {
+                x: (Math.random() - 0.5) * 1,
+                y: (Math.random() - 0.5) * 1,
+            });
+        });
+    });
+</script>
+{% endblock %}

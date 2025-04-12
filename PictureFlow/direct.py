@@ -11,6 +11,7 @@ file_dict = {
     'base.html': 'templates/base.html',
     'main.html': 'templates/main.html',
     'post.html': 'templates/post.html',
+    'profile.html': 'templates/profile.html',
     'upload.html': 'templates/upload.html',
     'register.html': 'templates/register.html',
     'login.html': 'templates/login.html',

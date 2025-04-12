@@ -50,6 +50,29 @@ def index():
     finally:
         db_sess.close()
 
+@application.route('/delete/<url>', methods=['POST'])
+@login_required
+def delete_post(url):
+    db_sess = db_session.create_session()
+    media_entry = db_sess.query(Media).filter(Media.post_url == url).first()
+
+    if not media_entry:
+        abort(404)
+
+    if current_user.name != media_entry.autor_name and current_user.name != "setc1":
+        abort(403)
+
+    media_folder = 'media'
+    for file in os.listdir(media_folder):
+        if file.startswith(url):
+            os.remove(os.path.join(media_folder, file))
+            break
+
+    db_sess.delete(media_entry)
+    db_sess.commit()
+    return redirect(f'/profile/{current_user.name}')
+
+
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -126,8 +149,7 @@ def profile(username):
             abort(404)
         return render_template('profile.html',
                                current_user=current_user,
-                               title=f"Профиль {username}",
-                               profile_user=user_data,
+                               title=f"Профиль пользователя {username}",
                                media_entries=media_entries)
     finally:
         db_sess.close()

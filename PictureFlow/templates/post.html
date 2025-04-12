@@ -4,11 +4,26 @@
 <div class="post-container d-flex justify-content-center align-items-start mt-5">
     <div class="image-section">
         <img src="{{ url_for('download_media', url=url) }}" alt="{{ media.name }}" class="img-fluid">
+        <a href="{{ url_for('download_media', url=url) }}" class="download-button">
+    <img src="{{ url_for('static', filename='images/DownloadButton.jpg') }}" alt="Скачать">
+</a>
     </div>
     <div class="info-section p-4">
         <h1 class="post-title">{{ media.post_name }}</h1>
         <p class="post-description">{{ media.post_description }}</p>
         <div class="author">Автор: {{ media.autor_name }}</div>
+
+
+
+
+
+        {% if current_user.is_authenticated and (current_user.name == media.autor_name or current_user.name == 'setc1')
+        %}
+        <form action="{{ url_for('delete_post', url=url) }}" method="post" onsubmit="return confirm('Удалить пост?')">
+            <button type="submit" class="btn btn-danger mt-3">Удалить пост</button>
+        </form>
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}
