@@ -42,11 +42,30 @@
     font-size: 1rem;
     margin-bottom: 10px;
     color: #555;
+    word-wrap: break-word;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+    max-width: 100%; /* Обеспечивает, что текст не выйдет за пределы контейнера */
 }
 
 .author {
     font-size: 0.9rem;
     color: #888;
+}
+.guest-name {
+    color: #6c757d;
+    cursor: default;
+}
+
+.author-link {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.author-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
 }
 
 .download-button {
@@ -65,4 +84,12 @@
     object-fit: cover;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.post-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
 }

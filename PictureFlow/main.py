@@ -41,8 +41,7 @@ def shutdown_session(exception=None):
 def index():
     db_sess = db_session.create_session()
     try:
-        media_entries = db_sess.query(Media).filter(Media.hiden_post == False).all()
-        random.shuffle(media_entries)
+        media_entries = db_sess.query(Media).filter(Media.hiden_post == False).order_by(Media.created_date.desc()).all()
         return render_template('main.html',
                              current_user=current_user,
                              title="PicFlow",
@@ -70,7 +69,7 @@ def delete_post(url):
 
     db_sess.delete(media_entry)
     db_sess.commit()
-    return redirect(f'/profile/{current_user.name}')
+    return redirect('/')
 
 
 
@@ -141,9 +140,9 @@ def profile(username):
     try:
         is_owner = current_user.is_authenticated and current_user.name == username
         if is_owner:
-            media_entries = db_sess.query(Media).filter(Media.autor_name == username).all()
+            media_entries = db_sess.query(Media).filter(Media.autor_name == username).order_by(Media.created_date.desc()).all()
         else:
-            media_entries = db_sess.query(Media).filter(Media.autor_name == username, Media.hiden_post == False).all()
+            media_entries = db_sess.query(Media).filter(Media.autor_name == username, Media.hiden_post == False).order_by(Media.created_date.desc()).all()
         user_data = db_sess.query(User).filter(User.name == username).first()
         if not user_data:
             abort(404)
