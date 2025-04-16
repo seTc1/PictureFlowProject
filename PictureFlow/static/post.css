@@ -2,7 +2,8 @@
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
-    max-width: 700px;
+    max-width: 800px;
+    min-width: 300px;
     margin: 40px auto;
     background: #fff;
     border-radius: 16px;
@@ -29,7 +30,8 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow: hidden;
 }
 
 .post-title {
@@ -42,10 +44,10 @@
     font-size: 1rem;
     margin-bottom: 10px;
     color: #555;
-    word-wrap: break-word;
     white-space: pre-line;
     overflow-wrap: break-word;
-    max-width: 100%; /* Обеспечивает, что текст не выйдет за пределы контейнера */
+    word-break: break-word;
+    width: 100%;
 }
 
 .author {
