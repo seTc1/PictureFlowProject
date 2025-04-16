@@ -13,7 +13,7 @@ from data import db_session
 from data.users_data import User
 from data.media_files import Media
 
-application = Flask(__name__)
+application = Flask(__name__, static_folder='static', static_url_path='/static')
 with open('API_KEY.api', 'r') as file:
     API_KEY = file.readline().strip()
 application.config['SECRET_KEY'] = API_KEY
@@ -234,7 +234,6 @@ def get_post(url):
     media_entry = db_sess.query(Media).filter(Media.post_url == url).first()
 
     if not media_entry:
-        print("aboba")
         abort(404)
 
     file_path = None
@@ -244,7 +243,6 @@ def get_post(url):
             break
 
     if not file_path:
-        print("aboba2")
         abort(404)
 
     return render_template('post.html', media=media_entry, url=url, ext=media_entry.file_extension,
