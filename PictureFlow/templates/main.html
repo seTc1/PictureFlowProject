@@ -10,15 +10,19 @@
     <h2 class="sub-text mb-4">сайт для хостинга и обмена картинками</h2>
 
     <div class="masonry-grid">
-      {% for media in media_entries %}
-      <div class="masonry-item">
-        <a href="{{ url_for('get_post', url=media.post_url) }}">
-          <div class="image-wrapper loading">
-            <img src="{{ url_for('download_media', url=media.post_url) }}"
-                 alt="{{ media.post_name }}"
-                 onload="this.classList.add('loaded'); this.parentElement.classList.remove('loading')">
-          </div>
-        </a>
+      {% for column in range(4) %}
+      <div class="masonry-column">
+        {% for media in media_entries[column::4] %}
+        <div class="masonry-item">
+          <a href="{{ url_for('get_post', url=media.post_url) }}">
+            <div class="image-wrapper loading">
+              <img src="{{ url_for('download_media', url=media.post_url) }}"
+                   alt="{{ media.post_name }}"
+                   onload="this.classList.add('loaded'); this.parentElement.classList.remove('loading')">
+            </div>
+          </a>
+        </div>
+        {% endfor %}
       </div>
       {% endfor %}
     </div>
