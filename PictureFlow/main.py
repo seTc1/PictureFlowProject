@@ -37,15 +37,33 @@ def load_user(user_id):
 def shutdown_session(exception=None):
     db_session.Session.remove()
 
+from flask import jsonify
+
 @application.route('/')
 def index():
     db_sess = db_session.create_session()
     try:
-        media_entries = db_sess.query(Media).filter(Media.hiden_post == False).order_by(Media.created_date.desc()).all()
-        return render_template('main.html',
-                             current_user=current_user,
-                             title="PicFlow",
-                             media_entries=media_entries)
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 40, type=int)
+        media_query = db_sess.query(Media).filter(Media.hiden_post == False).order_by(Media.created_date.desc())
+        media_entries = media_query.offset((page - 1) * per_page).limit(per_page).all()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            media_list = [{
+                'post_url': media.post_url,
+                'post_name': media.post_name,
+                'file_extension': media.file_extension,
+                'autor_name': media.autor_name,
+            } for media in media_entries]
+            return jsonify({
+                'media': media_list,
+                'has_next': len(media_entries) == per_page
+            })
+        else:
+            return render_template('main.html',
+                                 current_user=current_user,
+                                 title="PicFlow",
+                                 media_entries=media_entries)
     finally:
         db_sess.close()
 

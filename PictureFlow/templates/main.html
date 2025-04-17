@@ -11,13 +11,14 @@
 
     <div class="masonry-grid">
       {% for column in range(4) %}
-      <div class="masonry-column">
+      <div class="masonry-column" id="column-{{ column }}">
         {% for media in media_entries[column::4] %}
         <div class="masonry-item">
           <a href="{{ url_for('get_post', url=media.post_url) }}">
             <div class="image-wrapper loading">
               <img src="{{ url_for('download_media', url=media.post_url) }}"
                    alt="{{ media.post_name }}"
+                   loading="lazy"
                    onload="this.classList.add('loaded'); this.parentElement.classList.remove('loading')">
             </div>
           </a>
@@ -26,6 +27,78 @@
       </div>
       {% endfor %}
     </div>
+    <div id="loading-indicator" style="display: none; padding: 20px;">Загрузка...</div>
   </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentPage = 1;
+    let isLoading = false;
+    const perPage = 20;
+    const loadingIndicator = document.getElementById('loading-indicator');
+
+    function checkScroll() {
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoading) {
+            loadMore();
+        }
+    }
+
+    function loadMore() {
+        isLoading = true;
+        loadingIndicator.style.display = 'block';
+        currentPage++;
+        fetch(`/?page=${currentPage}&per_page=${perPage}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Ошибка загрузки');
+            return response.json();
+        })
+        .then(data => {
+            if (data.media.length > 0) {
+                let currentColumn = 0;
+                data.media.forEach(media => {
+                    const column = document.getElementById(`column-${currentColumn}`);
+                    if (column) {
+                        const item = createMediaItem(media);
+                        column.appendChild(item);
+                        currentColumn = (currentColumn + 1) % 4;
+                    }
+                });
+            }
+            if (!data.has_next) {
+                window.removeEventListener('scroll', checkScroll);
+                loadingIndicator.style.display = 'none';
+            }
+            isLoading = false;
+            loadingIndicator.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            isLoading = false;
+            loadingIndicator.style.display = 'none';
+        });
+    }
+
+    function createMediaItem(media) {
+        const item = document.createElement('div');
+        item.className = 'masonry-item';
+        item.innerHTML = `
+            <a href="/post/${media.post_url}">
+                <div class="image-wrapper loading">
+                    <img src="/download/${media.post_url}"
+                         alt="${media.post_name}"
+                         loading="lazy"
+                         onload="this.classList.add('loaded'); this.parentElement.classList.remove('loading')">
+                </div>
+            </a>
+        `;
+        return item;
+    }
+
+    window.addEventListener('scroll', checkScroll);
+});
+</script>
 {% endblock %}

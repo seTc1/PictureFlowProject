@@ -33,7 +33,7 @@
     width: 100%;
     display: block;
     opacity: 0;
-    transition: opacity 15s ease;
+    transition: opacity 0.4s ease;
 }
 
 .image-wrapper img.loaded {
@@ -67,4 +67,11 @@
     .masonry-column {
         flex: 0 0 100%;
     }
+}
+
+#loading-indicator {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.2rem;
+    color: #666;
 }
