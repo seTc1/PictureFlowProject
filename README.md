@@ -11,7 +11,7 @@
 
 </div>
 
-![MainLogo](https://imgur.com/8OHtrxh)
+![MainLogo](https://i.imgur.com/8OHtrxh.png)
 
 ---
 
@@ -73,4 +73,4 @@
 
 ---
 
-![MainPage](https://imgur.com/pFwlCIL)
+![MainPage](https://imgur.com/pFwlCIL.jpg)
