@@ -17,6 +17,7 @@ application = Flask(__name__, static_folder='static', static_url_path='/static')
 with open('API_KEY.api', 'r') as file:
     API_KEY = file.readline().strip()
 application.config['SECRET_KEY'] = API_KEY
+application.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 login_manager = LoginManager()
 login_manager.init_app(application)
 
@@ -89,8 +90,6 @@ def delete_post(url):
     db_sess.commit()
     return redirect('/')
 
-
-
 @application.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -111,7 +110,6 @@ def login():
             db_sess.close()
     return render_template('login.html', title='Авторизация', form=form)
 
-
 @application.route('/register', methods=['GET', 'POST'])
 def reqister():
     if current_user.is_authenticated:
@@ -127,6 +125,10 @@ def reqister():
                 return render_template('register.html', title='Регистрация',
                                        form=form,
                                        message="Слишком длинное имя (> 16)!")
+            if not re.match(r'^[a-zA-Z0-9_\.:\/]+$', form.name.data):
+                return render_template('register.html', title='Регистрация',
+                                       form=form,
+                                       message="Имя содержит недопустимые символы")
             db_sess = db_session.create_session()
             if db_sess.query(User).filter(User.email == form.email.data).first():
                 return render_template('register.html', title='Регистрация',
@@ -151,7 +153,6 @@ def reqister():
             return redirect('/')
         return render_template('register.html', title='Регистрация', form=form)
 
-
 @application.route('/profile/<username>')
 def profile(username):
     db_sess = db_session.create_session()
@@ -171,7 +172,6 @@ def profile(username):
     finally:
         db_sess.close()
 
-
 @application.route('/upload', methods=['GET', 'POST'])
 def upload():
     form = UploadForm()
@@ -179,10 +179,8 @@ def upload():
         name = form.name.data.strip()
         description = form.description.data.strip()
         file_name = form.file.data.filename
-        print(file_name)
 
         if len(name) > 20:
-            print(name)
             return render_template('upload.html', current_user=current_user, form=form,
                                    title="Загрузка публикации", message="Название не должно превышать 20 символов")
 
@@ -208,6 +206,19 @@ def upload():
             os.makedirs('media', exist_ok=True)
             file.save(file_path)
 
+            try:
+                from PIL import Image
+                with Image.open(file_path) as img:
+                    width, height = img.size
+                    if width > 4096 or height > 4096:
+                        os.remove(file_path)
+                        return render_template('upload.html', current_user=current_user, form=form,
+                                            title="Загрузка публикации", message="Размер изображения превышает 4096x4096 пикселей")
+            except:
+                os.remove(file_path)
+                return render_template('upload.html', current_user=current_user, form=form,
+                                    title="Загрузка публикации", message="Неверный формат изображения")
+
             author_name = current_user.name if current_user.is_authenticated else 'Гость'
             author_ip = request.remote_addr or 'Неизвестно'
 
@@ -225,9 +236,6 @@ def upload():
             db_sess.commit()
             return redirect(f'/post/{unique_name}')
     return render_template('upload.html', current_user=current_user, form=form, title="Загрузка публикации")
-
-
-
 
 @application.route('/download/<url>')
 def download_media(url):
@@ -266,13 +274,11 @@ def get_post(url):
     return render_template('post.html', media=media_entry, url=url, ext=media_entry.file_extension,
                            current_user=current_user, title=media_entry.post_name)
 
-
 @application.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
-
 
 @application.errorhandler(404)
 def page_not_found(error):
